@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+.env.*
+!*.env.example
+.streamlit/secrets.toml
+data/leads_manuales.json
+data/conversaciones_demo.json
+.venv/
+venv/
