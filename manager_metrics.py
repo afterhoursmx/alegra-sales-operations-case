@@ -6,7 +6,7 @@ BASELINE = {
     'Leads mensuales': '14,000',
     'MQL → SQL': '34%',
     'SQL → Won': '21%',
-    'Primer contacto': '5.2 h',
+    'Primer contacto · base anterior': '5.2 h',
     'Pérdidas «No responde»': '38%',
     'Completitud CRM': '61%',
     'Error forecast': '27%',

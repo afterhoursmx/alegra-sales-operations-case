@@ -156,18 +156,41 @@ def executive(results,cases):
             else:st.success('🟢 Escenario favorable')
     with y:
         st.bar_chart(__import__('pandas').DataFrame({'MXN':{'Forecast':float(forecast),'Cierre simulado':float(actual)}}),horizontal=True,color='#14A9C8')
-    st.markdown('#### Métricas prioritarias del caso · línea base')
-    metrics=list(BASELINE.items())
-    for group in [metrics[:4],metrics[4:]]:
-        cols=st.columns(len(group))
-        for col,(k,v) in zip(cols,group):col.metric(k,v)
+    with st.expander('Consultar diagnóstico inicial del caso'):
+        metrics=list(BASELINE.items())
+        for group in [metrics[:4],metrics[4:]]:
+            cols=st.columns(len(group))
+            for col,(k,v) in zip(cols,group):col.metric(k,v)
     st.divider()
     updates=load_updates();rows=filters(results,cases,updates,'exe_');summary=sample_summary(rows)
-    st.markdown('#### Gestión de la cartera sintética')
+    st.markdown('#### Comparativo de Sales Managers · misma vista')
+    st.caption('Territorios y distribución de vendedores ilustrativos. Indicadores basados en registros sintéticos de la demo, no en el desempeño real de personas.')
+    # El comparativo respeta los mismos filtros del Overview.
+    selected_manager=st.session_state.get('exe_manager','Todos')
+    selected_country=st.session_state.get('exe_country','Todos')
+    selected_team=st.session_state.get('exe_team','Todos')
+    selected_seller=st.session_state.get('exe_seller','Todos')
+    manager_cards=[]
+    for mgr,areas in MANAGER_COUNTRIES.items():
+        if selected_manager!='Todos' and mgr!=selected_manager:
+            continue
+        if selected_country!='Todos' and selected_country not in areas:
+            continue
+        territory=scoped_rows(results,cases,updates=updates,country=selected_country,team=selected_team,seller=selected_seller)
+        territory=[z for z in territory if z['lead'].get('pais') in areas]
+        snap=sample_summary(territory)
+        overdue_mgr=sum(any(label in ('Seguimiento vencido','Resultado de cita vencido (>24 h)') for _,label in z['alertas']) for z in territory)
+        manager_cards.append({'Manager':mgr,'Países':', '.join(sorted(areas if selected_country=='Todos' else [selected_country])),
+                              'Leads demo':snap['leads'],'Con responsable':snap['asignados'],'Citas':snap['citas'],
+                              'Con alertas':snap['alertas'],'Seguimientos/resultados vencidos':overdue_mgr,
+                              'Acción sugerida': 'Priorizar revisión de vencidos' if overdue_mgr else ('Revisar casos con alertas' if snap['alertas'] else 'Mantener seguimiento')})
+    st.dataframe(__import__('pandas').DataFrame(manager_cards),hide_index=True,use_container_width=True)
+    st.caption('Para evaluar revenue o productividad real por manager, necesitaremos volumen y complejidad de cartera, tiempo disponible y ventas contratadas comparables.')
+    st.markdown('#### Gestión de oportunidades')
     cards=[('Leads visibles',summary['leads']),('Con contacto',summary['con_contacto']),('Con vendedor',summary['asignados']),('Citas registradas',summary['citas']),('Con alertas',summary['alertas'])]
     cols=st.columns(len(cards))
     for c,(k,v) in zip(cols,cards):c.metric(k,v)
-    st.markdown('#### Ejecución y cumplimiento · datos sintéticos')
+    st.markdown('#### Ejecución y cumplimiento')
     today=datetime.now()
     overdue=sum(any(label=='Resultado de cita vencido (>24 h)' for _,label in x['alertas']) for x in rows)
     waiting=sum(any(label=='Cita vencida sin resultado' for _,label in x['alertas']) for x in rows)
@@ -219,7 +242,4 @@ def executive(results,cases):
             {'Lead':'Cliente demo B','País':'Colombia','Equipo':'Contador','Vendedor':'Vendedor 2','Fecha':demo_dates[1].strftime('%d/%m/%Y %H:%M'),'Estado':'Ejemplo · no reservada'},
         ],hide_index=True,use_container_width=True)
 
-    st.markdown('#### Cartera histórica · recuperación inteligente')
-    st.caption('La IA propone prioridades y correcciones; el CRM será la fuente de verdad para tareas y ejecución.')
-    if st.button('Ver diagnóstico y recuperación',use_container_width=True):
-        st.session_state['navegar_a']='Recuperación de oportunidades';st.rerun()
+

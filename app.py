@@ -130,6 +130,9 @@ def extract_declared_name(message, awaiting_name=False):
     if match:
         value = match.group(1)
     elif awaiting_name:
+        # La respuesta puede añadir una necesidad después del nombre: «Raúl Villanueva, también quiero POS».
+        # Extraer solo la cláusula inicial, preservando el mensaje completo para detectar necesidades.
+        text = re.split(r'[,;]|\s+(?:también|tambien|además|ademas)\s+', text, maxsplit=1, flags=re.I)[0].strip()
         # Puede contestar nombre y teléfono/correo en un solo mensaje.
         # El número se procesa por separado mediante extract_contact; nunca se guarda como nombre.
         cleaned = re.sub(r'[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}', ' ', text)
@@ -361,6 +364,8 @@ Textos: '''+json.dumps(messages,ensure_ascii=False)
 
 from crm_recovery_view import view as recovery_view
 
+from revenue_view import show as revenue_view
+
 if 'ai_cache' not in st.session_state: st.session_state.ai_cache={}
 if 'chat_selected' not in st.session_state: st.session_state.chat_selected=None
 if 'vista_actual' not in st.session_state: st.session_state.vista_actual='Overview gerencial'
@@ -405,15 +410,17 @@ if st.session_state.pop('volver_al_panel', False):
 next_view=st.session_state.pop('navegar_a',None)
 if next_view:
     st.session_state.vista_actual = next_view
-if st.session_state.get('vista_actual') not in ('Overview gerencial','Cartera de oportunidades','Atención comercial con IA','Recuperación de oportunidades'):
+if st.session_state.get('vista_actual') not in ('Overview gerencial','Cartera de oportunidades','Atención comercial con IA','Recuperación de oportunidades','Impacto en revenue'):
     st.session_state.vista_actual='Overview gerencial'
-st.segmented_control('Vista', ['Overview gerencial','Cartera de oportunidades','Atención comercial con IA','Recuperación de oportunidades'],key='vista_actual',label_visibility='collapsed')
+st.segmented_control('Vista', ['Overview gerencial','Cartera de oportunidades','Recuperación de oportunidades','Impacto en revenue','Atención comercial con IA'],key='vista_actual',label_visibility='collapsed')
 if st.session_state.vista_actual == 'Overview gerencial':
     executive(results,cases)
 if st.session_state.vista_actual == 'Cartera de oportunidades':
     operational(results,cases)
 if st.session_state.vista_actual == 'Recuperación de oportunidades':
     recovery_view()
+if st.session_state.vista_actual == 'Impacto en revenue':
+    revenue_view()
 if st.session_state.vista_actual == 'Atención comercial con IA':
     st.markdown('### Bandeja omnicanal · simulación funcional')
     st.caption('Canales ficticios, sin envíos externos. La IA responde en la pantalla; el asesor y el calendario son simulados. No uses datos personales reales.')

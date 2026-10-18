@@ -65,7 +65,7 @@ def business_needs_from_history(history):
     text = ' '.join(x.get('texto', '') for x in history if x.get('rol') == 'prospecto').lower()
     tags = []
     if re.search(r'factur|cfdi|comprobante fiscal', text): tags.append('Facturación')
-    if re.search(r'inventari|existencias|stock|control de ventas', text): tags.append('Inventarios / ventas')
+    if re.search(r'inventari|existencias|stock|control de ventas|\bpos\b|punto de venta|terminal de venta', text): tags.append('Inventarios / ventas')
     if re.search(r'migraci[oó]n|migrar|cambiar de sistema', text): tags.append('Migración')
     return tags
 
@@ -82,7 +82,7 @@ def deterministic_fallback(message, facts, history=None):
         if re.search(r'(?:solo|solamente|únicamente).{0,25}factur', latest):
             return ('Perfecto, entonces priorizamos la emisión de facturas. Podemos revisar los pasos iniciales '
                     'y después valorar el control de inventario. ¿Ya emites facturas con algún sistema?')
-        return ('Entiendo: tienes un negocio, llevas inventarios en Excel y quieres empezar a facturar. '
+        return ('Entiendo que quieres facturar y también gestionar las ventas de tu negocio con POS. '
                 'La primera decisión es si quieres gestionar solo facturas o también ventas e inventarios en un mismo flujo; '
                 'habría que verificar qué ofrece el catálogo vigente. ¿Quieres integrar ambos procesos o comenzar solo con facturación?')
     if 'Facturación' in needs:
@@ -254,26 +254,47 @@ def appointment_preference(message):
     return ''
 
 def requested_demo_slot(text, slots):
-    """Interpreta hora + día de la semana de forma conservadora; confirma solo un slot presente."""
-    t=(text or '').lower()
-    hourmatch=re.search(r'\b(?:a las|las)\s*(\d{1,2})(?::(\d{2}))?\s*(?:de la\s+)?(mañana|tarde|noche|am|pm)?',t)
-    if not hourmatch: return None,False
-    hour=int(hourmatch.group(1));minute=int(hourmatch.group(2) or 0)
-    suffix=hourmatch.group(3)
+    """Acepta horario solo (12:30, 1230, a las 1230) y día opcional.
+
+    Si hay varios días con la misma hora, escoge el primer día OFRECIDO,
+    sin exigir que el prospecto repita lunes.
+    """
+    t=(text or '').lower().strip()
+    # Evitar aceptar números telefónicos largos como horas.
+    match=re.search(r'(?<!\d)(?:a\s+las\s+|las\s+)?(\d{1,2})[:.](\d{2})(?!\d)',t)
+    if not match:
+        match=re.search(r'(?<!\d)(?:a\s+las\s+|las\s+)?(\d{1,2})([0-5]\d)(?!\d)',t)
+    if match:
+        hour,minute=int(match.group(1)),int(match.group(2))
+    else:
+        match=re.search(r'\b(?:a\s+las\s+|las\s+)(\d{1,2})(?!\d)',t)
+        if not match:
+            # "a las 12", "12 pm", "12" cuando se piden horarios.
+            match=re.fullmatch(r'(\d{1,2})\s*(am|pm)?',t)
+            if not match:return None,False
+        hour,minute=int(match.group(1)),0
+    if hour>23 or minute>59:return None,True
+    suffix=re.search(r'(?:\b(?:de la\s+)?(mañana|tarde|noche)\b|(?<![a-z])(am|pm)\b)',t)
+    suffix=(suffix.group(1) or suffix.group(2)) if suffix else ''
     if suffix in ('tarde','noche','pm') and hour<12:hour+=12
     if suffix in ('mañana','am') and hour==12:hour=0
-    if hour>23 or minute>59:return None,True
     wd=next((num for name,num in WEEKDAYS.items() if re.search(r'\b'+name+r'\b',t)),None)
-    today_based='mañana' in t or 'hoy' in t or 'pasado mañana' in t
-    for slot in slots:
-        d=datetime.fromisoformat(slot)
-        if d.hour!=hour or d.minute!=minute:continue
-        if wd is not None and d.weekday()!=wd:continue
-        if today_based:
-            now=datetime.now(d.tzinfo).date()
-            offset=2 if 'pasado mañana' in t else 1 if 'mañana' in t else 0
-            if d.date()!=(now+timedelta(days=offset)):continue
-        return slot,True
+    relative='pasado mañana' if 'pasado mañana' in t else 'mañana' if 'mañana' in t and suffix!='mañana' else 'hoy' if 'hoy' in t else ''
+    # Si dice 'a las 4' sin AM/PM y solo ofrecimos 16:00, tomar 16:00.
+    # La coincidencia literal tiene prioridad si también existe 04:00.
+    possible_hours=[hour]
+    if not suffix and 1 <= hour <= 11:
+        possible_hours.append(hour+12)
+    for possible_hour in possible_hours:
+        for slot in slots:
+            d=datetime.fromisoformat(slot)
+            if (d.hour,d.minute)!=(possible_hour,minute):continue
+            if wd is not None and d.weekday()!=wd:continue
+            if relative:
+                now=datetime.now(d.tzinfo).date()
+                offset=2 if relative=='pasado mañana' else 1 if relative=='mañana' else 0
+                if d.date()!=now+timedelta(days=offset):continue
+            return slot,True
     return None,True
 
 def advisor_reply(case, incoming, pais):
