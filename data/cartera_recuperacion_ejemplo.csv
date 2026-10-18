@@ -1,0 +1,11 @@
+﻿id,nombre,pais,telefono,correo,segmento,mensaje,etapa,responsable,ultimo_intento,respondio
+R-001,Cliente 1,México,+52 (477) 000-0101,Cliente1@EJEMPLO.COM,,Tengo una tienda de ropa y necesito facturación,MQL,,2026-10-11,No
+R-002,Cliente 2,Colombia,+57 300 000 0102,cliente2@ejemplo.com,,Soy contador y administro 20 clientes,MQL,Vendedor 2,2026-10-12,No
+R-003,Cliente 3,México,+52 477 000 0103,cliente3@ejemplo.com,PyME,Quiero una demo y hablar con asesor,SQL,,2026-10-10,No
+R-004,Cliente 4,Perú,+51 999 000 104,cliente4@ejemplo.com,,Tengo una cafetería y busco un sistema,MQL,Vendedor 4,,
+R-005,Cliente 5,México,+52 477 000 0105,cliente5@ejemplo.com,Contador,Soy contador y tengo clientes que facturan,MQL,Vendedor 5,,
+R-006,Cliente 6,Colombia,+57 300 000 0102,cliente2@ejemplo.com,,Quiero ayuda con el programa,MQL,,,
+R-007,Cliente 7,,+52 477 000 0107,cliente7@ejemplo.com,,Negocio de ropa con clientes en Perú; operamos en Perú,MQL,,,
+R-008,Cliente 8,República Dominicana,,cliente8@ejemplo.com,,Necesito asesoría sin más detalles,MQL,Vendedor 8,,
+R-009,Cliente 9,México,+52 477 000 0109,cliente9@ejemplo.com,PyME,Tengo tienda online,MQL,Vendedor 9,,
+R-010,Cliente 10,Perú,+51 999 000 110,,,",Solicité un asesor hace una semana",MQL,,2026-10-11,No

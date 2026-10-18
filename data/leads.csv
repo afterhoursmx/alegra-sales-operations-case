@@ -1,0 +1,13 @@
+id,nombre,pais,segmento,contacto,fuente,etapa,fecha_ingreso,ultimo_intento,intentos,respondio,mensaje
+L-001,Cafetería Sol,México,Pyme,sol@ejemplo.com,Google Ads,MQL,2026-10-16,,0,,Tengo una cafetería y quiero facturar hoy. Me gustaría hablar con un asesor.
+L-002,Despacho Norte,México,Contador,norte@ejemplo.com,Formulario,MQL,2026-10-14,2026-10-13,2,No,Soy contador con 35 clientes y necesito migrar mi sistema el próximo mes. Quiero una demo.
+L-003,Tienda Rosa,Colombia,Pyme,rosa@ejemplo.com,Redes sociales,MQL,2026-10-16,,0,,Tengo tienda física e Instagram; necesito gestionar ventas e inventarios y comenzar el próximo mes. Quiero asesoría.
+L-004,Proyecto Andino,Colombia,Pyme,andino@ejemplo.com,Contenido,MQL,2026-10-15,,0,,Estoy comparando sistemas de facturación y probablemente decidiré en tres meses.
+L-005,Agencia Central,México,Pyme,central@ejemplo.com,Google Ads,MQL,2026-10-13,,0,,Quiero emitir facturas y comenzar esta semana; necesito orientación.
+L-006,Estudio Alfa,Perú,Contador,alfa@ejemplo.com,Evento,MQL,2026-10-12,2026-10-12,3,No,Soy contador y quiero conocer opciones para administrar clientes; por ahora estoy explorando.
+L-007,Mini Market,República Dominicana,Pyme,market@ejemplo.com,Formulario,MQL,2026-10-16,,0,,Necesito inventario y punto de venta para mi tienda hoy.
+L-008,Empresa Sin Canal,México,Pyme,,Landing,MQL,2026-10-14,,0,,Necesito facturación este mes y quisiera hablar con asesor.
+L-009,Despacho Horizonte,Perú,Contador,horizonte@ejemplo.com,Referido,MQL,2026-10-16,,0,,Soy contador. Quiero migrar mis clientes y agendar una demostración lo antes posible.
+L-010,Pyme Beta,Colombia,Pyme,beta@ejemplo.com,Campaña,MQL,2026-10-16,,0,,Vendo en internet y quiero gestionar inventario. Estoy explorando opciones.
+L-011,Contacto Sin Contexto,México,,lead@ejemplo.com,Landing,MQL,2026-10-16,,0,,Hola. Me interesa conocer más.
+L-012,Proveedor Delta,México,Pyme,delta@ejemplo.com,Referido,SQL,2026-10-11,2026-10-10,2,No,Tenemos una empresa y queremos mejorar nuestras facturas. Quizá el próximo mes.
