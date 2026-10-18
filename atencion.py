@@ -269,8 +269,14 @@ def requested_demo_slot(text, slots):
     else:
         match=re.search(r'\b(?:a\s+las\s+|las\s+)(\d{1,2})(?!\d)',t)
         if not match:
-            # "a las 12", "12 pm", "12" cuando se piden horarios.
-            match=re.fullmatch(r'(\d{1,2})\s*(am|pm)?',t)
+            # Aceptar respuestas naturales con día: "lunes 4pm", "el lunes 4", "lunes a las 4".
+            # Solo interpretar números aislados como hora cuando el texto es una selección de horario.
+            day_names='|'.join(sorted((re.escape(day) for day in WEEKDAYS), key=len, reverse=True))
+            day_prefixed=rf'^(?:el\s+)?(?:{day_names})\s+(?:a\s+las\s+|las\s+)?(\d{{1,2}})\s*(?:am|pm|de\s+la\s+tarde|de\s+la\s+mañana)?$'
+            match=re.fullmatch(day_prefixed,t)
+        if not match:
+            # "12 pm", "12", "4pm" cuando se piden horarios.
+            match=re.fullmatch(r'(\d{1,2})\s*(?:am|pm)?',t)
             if not match:return None,False
         hour,minute=int(match.group(1)),0
     if hour>23 or minute>59:return None,True

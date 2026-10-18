@@ -25,3 +25,15 @@ def test_am_pm_and_literal_slot_priority():
     assert requested_demo_slot('lunes a las 4am',slots)[0]==slots[0]
     assert requested_demo_slot('lunes a las 4',slots)[0]==slots[0]
     assert requested_demo_slot('lunes a las 4pm',slots)[0]==slots[1]
+
+
+def test_weekday_with_hour_without_a_las():
+    for message in ['lunes 4pm', 'lunes 4 pm', 'lunes 4', 'el lunes 4pm', 'lunes 16:00']:
+        slot,asked=requested_demo_slot(message,SLOTS)
+        assert asked and slot==SLOTS[3], (message,slot)
+
+def test_weekday_with_time_does_not_infer_wrong_day():
+    assert requested_demo_slot('martes 4pm',SLOTS)==(None,True)
+
+def test_weekday_other_text_is_not_time():
+    assert requested_demo_slot('lunes me interesa facturar',SLOTS)==(None,False)
